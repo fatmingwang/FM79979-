@@ -2012,10 +2012,9 @@ namespace MPDI
 			WARNING_MSG("this pi's name has already added!");
 			return;
 		}
-		bool	l_b = m_pImageResourceManagerAWP->Parse(DNCT::GcStringToChar(e_strFileName));
-		if( l_b )
+		cPuzzleImage*l_pPuzzleImageAWP = m_pImageResourceManagerAWP->GetPuzzleImageByFileName(DNCT::GcStringToChar(e_strFileName).c_str());
+		if( l_pPuzzleImageAWP)
 		{
-			cPuzzleImage*l_pPuzzleImageAWP = dynamic_cast<cPuzzleImage*>(m_pImageResourceManagerAWP->GetObject(m_pImageResourceManagerAWP->Count()-1));
 			m_pMPDIList->SetPuzzleImage(l_pPuzzleImageAWP);
 			m_pMPDIUI->AllPI_listBox->Items->Add(DNCT::WcharToGcstring(l_pPuzzleImageAWP->GetName()));
 		}
@@ -2064,18 +2063,12 @@ namespace MPDI
 		m_pMPDIUI->AddPath_button->Enabled = false;
 		m_pImagePlayManagerAWP = new cAnimationParser();
 		m_pImageResourceManagerAWP = m_pImagePlayManagerAWP->GetAllBaseImageList();
-		bool	l_b = m_pImageResourceManagerAWP->Parse(DNCT::GcStringToChar(e_strFileName));
-		if( l_b )
+		cPuzzleImage*l_pPuzzleImageAWP = m_pImageResourceManagerAWP->GetPuzzleImageByFileName(DNCT::GcStringToChar(e_strFileName).c_str());
+		if(l_pPuzzleImageAWP)
 		{
-			if( !m_pImageResourceManagerAWP->Count() )
-			{
-				return;
-			}
-			cPuzzleImage*l_pPuzzleImageAWP = 0;
 			m_pMPDIList = new cMPDIList();
 			m_pInterlUseForShowImagePos = new cCueToStartCurveWithTime(m_pMPDIList);
 			m_pImagePlayManagerAWP->AddObject(m_pMPDIList);
-			l_pPuzzleImageAWP = dynamic_cast<cPuzzleImage*>(m_pImageResourceManagerAWP->GetObject(0));
 			l_pPuzzleImageAWP->GenerateAllPuzzleImageUnit();
 
 			m_pMPDIList->SetPuzzleImage(l_pPuzzleImageAWP);

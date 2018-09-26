@@ -148,7 +148,8 @@ namespace PI
 			m_pTimeAndFPS = new UT::sTimeAndFPS;
 			m_pImageIndexOfAnimation = new cImageIndexOfAnimation(true);
 			m_pImageIndexOfAnimationList = new cNamedTypedObjectVector<cImageIndexOfAnimation>;
-			m_pImageomposerIRM = new cImageParser(true);
+			m_pImageomposerIRM = new cImageParser();
+			cPuzzleImage::m_sbSortPIFileAsOriginal = true;
 			m_pOrthogonalCamera = new cOrthogonalCamera();
 			m_pOrthogonalCameraForTrianhulatorPIUnit = new cOrthogonalCamera();
 			m_ImageTale = gcnew System::Collections::Hashtable;
@@ -1550,6 +1551,8 @@ namespace PI
 								--i;
 							}
 						}
+						if (m_pPuzzleImageUnitTriangulatorManager)
+							m_pPuzzleImageUnitTriangulatorManager->RemoveObject(dynamic_cast<cUIImage*>(l_pNamedTypedObject));
 						m_pImageomposerIRM->RemoveObject(DNCT::GcStringToWchar(l_pObject->ToString()));
 					 }
 					 if( m_pImageomposerIRM->Count() != AllImage_listBox->Items->Count )
@@ -2763,7 +2766,7 @@ private: System::Void AddNewPIUnitImage_button_Click(System::Object^  sender, Sy
 		}
 	}
 
-	private: System::Void button1_Click_1(System::Object^  sender, System::EventArgs^  e) 
+	private: System::Void button1_Click_1(System::Object^  sender, System::EventArgs^  e)
 	{
 		if (m_pCurrentSelectedPuzzleImageUnitTriangulator)
 		{

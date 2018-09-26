@@ -7,9 +7,9 @@
 namespace FATMING_CORE
 {
 
-	extern bool		g_bImageLoaderForFetchPixelData;
+	bool	g_bImageLoaderForFetchPixelData = false;
 	//sometimes we only need to PI data but no pixels data
-	extern bool    g_bSkipImageLoad;
+	bool    g_bSkipImageLoad = false;
 	bool cPuzzleImage::m_sbSortPIFileAsOriginal = false;
 
 	TYPDE_DEFINE_MARCO(cPuzzleImage);
@@ -196,19 +196,27 @@ namespace FATMING_CORE
 
 	bool	cPuzzleImage::MyParse(TiXmlElement*e_pRoot)
 	{
+		auto l_pRoot = e_pRoot;
 		auto l_strImageName = e_pRoot->Attribute(L"ImageName");
+		auto l_strCount = e_pRoot->Attribute(L"Count");
 		if(l_strImageName)
 		{
-			auto l_strImageFullPathName = StringAddDirectory(UT::WcharToChar(l_strImageName)).c_str();
+			auto l_strImageFullPathName = StringAddDirectory(UT::WcharToChar(l_strImageName));
 			if (!g_bSkipImageLoad)
 			{
-				this->ParseTexture(l_strImageFullPathName, g_bImageLoaderForFetchPixelData);
+				this->ParseTexture(l_strImageFullPathName.c_str(), g_bImageLoaderForFetchPixelData);
 			}
 			else
 			{
 			}
 			SetName(UT::GetFileNameWithoutFullPath(this->m_strFileName).c_str());
 		}
+		if(l_strCount)
+		{
+			m_iNumImage = GetInt(l_strCount);
+			m_pAllPuzzleData = new sPuzzleData[m_iNumImage];
+		}
+		int l_iPIUnitIndex = 0;
 		FOR_ALL_FIRST_CHILD_AND_ITS_CIBLING_START(e_pRoot)
 			auto l_strName = e_pRoot->Value();
 			COMPARE_NAME("AnimationData")
@@ -218,11 +226,12 @@ namespace FATMING_CORE
 			else
 			COMPARE_NAME("PuzzleUnit")
 			{
-				ProcessPuzzleUnit(e_pRoot);
+				ProcessPuzzleUnit(e_pRoot, l_iPIUnitIndex);
+				++l_iPIUnitIndex;
 			}
 		FOR_ALL_FIRST_CHILD_AND_ITS_CIBLING_END(e_pRoot)
 		GenerateAllPuzzleImageUnit();
-		ProcessDataCheck(e_pRoot);
+		ProcessDataCheck(l_pRoot);
 		if (!g_bSupportNonPowerOfTwoTexture)
 		{
 			if (GetWidth() != power_of_two(GetWidth()) || GetHeight() != power_of_two(GetHeight()))
@@ -254,6 +263,7 @@ namespace FATMING_CORE
 		m_pImageIndexOfAnimation = new cNamedTypedObjectVector<cImageIndexOfAnimation>();
 		FOR_ALL_FIRST_CHILD_AND_ITS_CIBLING_START(e_pElement)
 			cImageIndexOfAnimation*l_pImageIndexOfAnimation = nullptr;
+			int l_iCount = 0;
 			PARSE_ELEMENT_START(e_pElement)
 				COMPARE_NAME("Name")
 				{
@@ -265,14 +275,13 @@ namespace FATMING_CORE
 				else
 				COMPARE_NAME("Count")
 				{
-					m_iNumImage = VALUE_TO_INT;
-					m_pAllPuzzleData = new sPuzzleData[m_iNumImage];
+					l_iCount = VALUE_TO_INT;
 				}
 				else
 				COMPARE_NAME("ImageList")
 				{
 				    wchar_t*l_strImageName = wcstok((wchar_t*)l_strValue,L",");
-				    for( int i=0;i< m_iNumImage;++i )
+				    for( int i=0;i< l_iCount;++i )
 				    {
 				        l_pImageIndexOfAnimation->AddNameObject(l_strImageName,-1,0.1f);
 				        l_strImageName = wcstok(0,L",");
@@ -283,7 +292,7 @@ namespace FATMING_CORE
 				COMPARE_NAME("TimeList")
 				{
 				    wchar_t*l_strImageName = wcstok((wchar_t*)l_strValue,L",");
-				    for( int i=0;i< m_iNumImage;++i )
+				    for( int i=0;i< l_iCount;++i )
 				    {
 						l_pImageIndexOfAnimation->m_ImageAnimationDataList[i].fTimeGap = VALUE_TO_FLOAT;
 						l_strImageName = wcstok(0,L",");
@@ -294,38 +303,38 @@ namespace FATMING_CORE
 		FOR_ALL_FIRST_CHILD_AND_ITS_CIBLING_END(e_pElement)
 	}
 	//<PuzzleUnit Name = "GoldCoin5" UV = "0.7901235,0,0.9845679,0.2386364" OffsetPos = "0,0" Size = "63,63" OriginalSize = "63,63" ShowPosInPI = "256,0" / >
-	void cPuzzleImage::ProcessPuzzleUnit(TiXmlElement* e_pElement)
+	void cPuzzleImage::ProcessPuzzleUnit(TiXmlElement* e_pElement, int e_iIndex)
 	{
-		sPuzzleData	l_sPuzzleData;
-		PARSE_CURRENT_ELEMENT_START
+		sPuzzleData*l_pPuzzleData = &m_pAllPuzzleData[e_iIndex];
+		PARSE_ELEMENT_START(e_pElement)
 			COMPARE_NAME("Name")
 			{
-				l_sPuzzleData.strFileName = l_strValue;
+				l_pPuzzleData->strFileName = l_strValue;
 			}
 			else
 			COMPARE_NAME("UV")
 			{
-				::GetUV((wchar_t*)l_strValue,l_sPuzzleData.fUV);
+				::GetUV((wchar_t*)l_strValue, l_pPuzzleData->fUV);
 			}
 			else
 			COMPARE_NAME("OffsetPos")
 			{
-				l_sPuzzleData.OffsetPos = GetPoint(l_strValue);
+				l_pPuzzleData->OffsetPos = GetPoint(l_strValue);
 			}
 			else
 			COMPARE_NAME("Size")
 			{
-				l_sPuzzleData.Size = GetPoint(l_strValue);
+				l_pPuzzleData->Size = GetPoint(l_strValue);
 			}
 			else
 			COMPARE_NAME("OriginalSize")
 			{
-				l_sPuzzleData.OriginalSize = GetPoint(l_strValue);
+				l_pPuzzleData->OriginalSize = GetPoint(l_strValue);
 			}
 			else
 			COMPARE_NAME("ShowPosInPI")
 			{
-				l_sPuzzleData.ShowPosInPI = GetPoint(l_strValue);
+				l_pPuzzleData->ShowPosInPI = GetPoint(l_strValue);
 				//float	l_fUV[4] = {l_sPuzzleData.ShowPosInPI.x/1024.f,
 				//	l_sPuzzleData.ShowPosInPI.y/1024.f,
 				//	(l_sPuzzleData.ShowPosInPI.x+l_sPuzzleData.Size.x)/1024.f,
@@ -350,7 +359,8 @@ namespace FATMING_CORE
 			COMPARE_NAME("Count")
 			{
 #ifdef DEBUG
-				if(Count() != _wtoi(l_strValue))
+				int l_iCount = this->Count();
+				if(l_iCount != _wtoi(l_strValue))
 					assert(0&&"ProcessPuzzleImageTexture() count is not correct");
 #endif
 			}
@@ -398,15 +408,26 @@ namespace FATMING_CORE
 		std::vector<cPuzzleImageUnit*>	AllPuzzleImageUnit;
 		for( int i=0;i<this->m_iNumImage;++i )
 		{
-			cPuzzleImageUnit*l_p = new cPuzzleImageUnit(&m_pAllPuzzleData[i],this);
-			l_p->SetName(m_pAllPuzzleData[i].strFileName);
-			bool	l_b = this->AddObject(l_p);
-			if( !l_b )
+#ifndef RETAILER
+			if (this->m_pTexture&&m_pTexture->IsSameName(m_pAllPuzzleData[i].strFileName.c_str()))
 			{
-				SAFE_DELETE(l_p);
+				std::wstring l_strSame = m_pAllPuzzleData[i].strFileName.c_str();
+				l_strSame += L"_Copy";
+				UT::ErrorMsgByFormat(L"PIUnit and PI cannt be same name(%ls),now change name to %ls _Copy", m_pAllPuzzleData[i].strFileName.c_str(), m_pAllPuzzleData[i].strFileName.c_str());
+				m_pAllPuzzleData[i].strFileName = l_strSame;
 			}
-			else
-				AllPuzzleImageUnit.push_back(l_p);
+#endif
+			cPuzzleImageUnit*l_pUnit = new cPuzzleImageUnit(&m_pAllPuzzleData[i],this);
+			l_pUnit->SetName(m_pAllPuzzleData[i].strFileName);
+			this->AddObjectNeglectExist(l_pUnit);
+			//bool	l_b = this->AddObject(l_p);
+			//if( !l_b )
+			//{
+			//	UT::ErrorMsgByFormat(L"PIUnit %s exists!", m_pAllPuzzleData[i].strFileName.c_str());
+			//	SAFE_DELETE(l_p);
+			//}
+			//else
+			AllPuzzleImageUnit.push_back(l_pUnit);
 		}
 		cPuzzleImageUnit*l_pPrior = 0;
 		for( int i=0;i<this->m_iNumImage-1;++i )

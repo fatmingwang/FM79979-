@@ -7,6 +7,7 @@
 extern cGlyphFontRender*g_pDebugFont;
 cPuzzleImageUnitTriangulator::cPuzzleImageUnitTriangulator(cUIImage*e_pTargetImage)
 {
+	m_bEdited = false;
 	m_bWaitForGenerateTriangle = false;
 	m_TriangleVector.reserve(500);
 	m_iFocusPoint = -1;
@@ -144,6 +145,7 @@ void cPuzzleImageUnitTriangulator::MouseUp(int e_iPosX, int e_iPosY)
 	if (m_iFocusPoint != -1)
 	{
 		GenerateTriangle();
+		m_bEdited = true;
 	}
 	m_iFocusPoint = -1;
 }
@@ -316,6 +318,20 @@ cPuzzleImageUnitTriangulatorManager::cPuzzleImageUnitTriangulatorManager()
 
 cPuzzleImageUnitTriangulatorManager::~cPuzzleImageUnitTriangulatorManager()
 {
+}
+
+bool	cPuzzleImageUnitTriangulatorManager::IsTriangulatorEdited(cUIImage*e_pUIImage)
+{
+	int l_iCount = this->Count();
+	for (int i = 0; i < l_iCount; i++)
+	{
+		auto l_pObject = GetObject(i);
+		if (l_pObject->GetTargetImage()->IsSameName(e_pUIImage))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 cPuzzleImageUnitTriangulator * cPuzzleImageUnitTriangulatorManager::GetObject(cUIImage*e_pUIImage)

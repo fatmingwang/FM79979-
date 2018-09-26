@@ -401,8 +401,7 @@ namespace PI
 	cPuzzleImage*	cPIEditor::OpenPuzzleFile(String^e_strFileName)
 	{
 		 std::string l_strFileName = DNCT::GcStringToChar(e_strFileName);
-		 bool	l_b = m_pImageomposerIRM->Parse(l_strFileName.c_str());
-		 cPuzzleImage*l_pPuzzleImage = dynamic_cast<cPuzzleImage*>(m_pImageomposerIRM->GetObject(DNCT::GcStringToWchar(DNCT::GetFileNameWithoutFullPath(e_strFileName,true))));
+		 cPuzzleImage*l_pPuzzleImage = m_pImageomposerIRM->GetPuzzleImageByFileName(l_strFileName.c_str());
 		 if( l_pPuzzleImage )
 		 {
 			 if( m_pImageomposerIRM->GetObject(0)->Type() == cPuzzleImage::TypeID )
@@ -423,6 +422,8 @@ namespace PI
 	System::Void	cPIEditor::SavePuzzleFile(String^e_strFileName,bool e_bBinary)
 	{
 		ImageDetail_textBox->Text = "Saving file...";
+		auto l_strPIName = DNCT::GcStringToWchar(e_strFileName);
+		l_strPIName = UT::GetFileNameWithoutFullPath(l_strPIName.c_str());
 		for( int i=0;i<m_pImageomposerIRM->Count();++i )
 		{
 			cUIImage*l_pUIImage = dynamic_cast<cUIImage*>(m_pImageomposerIRM->GetObject(i));
@@ -437,8 +438,12 @@ namespace PI
 			}
 			if( l_pUIImage->GetImageRealSize().x%2 || l_pUIImage->GetImageRealSize().y%2 )
 			{
-				
 				ImageDetail_textBox->Text += DNCT::WcharToGcstring(l_pUIImage->GetName())+"image width or height is not even"+DNCT::GetChanglineString();
+			}
+			if (l_pUIImage->IsSameName(l_strPIName.c_str()))
+			{
+				WARNING_MSG("PIUnit and file name can't be same:"+DNCT::WcharToGcstring(l_strPIName));
+				return;
 			}
 		}
 		 String^l_FileName = e_strFileName;
@@ -604,6 +609,18 @@ namespace PI
 					    //	l_rc.right.ToString()+","+
 					    //	l_rc.bottom.ToString());
 					    l_XMLWriter.AddAttribute("ShowPosInPI", l_strShowPosInPI);
+
+						if (m_pPuzzleImageUnitTriangulatorManager && m_pPuzzleImageUnitTriangulatorManager->IsTriangulatorEdited(l_pUIImage))
+						{
+							auto l_pImageUnitTriangulator = m_pPuzzleImageUnitTriangulatorManager->GetObject(l_pUIImage);
+							if (l_pImageUnitTriangulator->isEdited())
+							{
+								auto l_pPoints = l_pImageUnitTriangulator->GetTriangulatorPointsVector();
+								if (l_pPoints->size())
+									l_XMLWriter.AddAttribute("TriangulatorPoints", ValueToString(*l_pPoints));
+							}
+						}
+
 					    l_ppPuzzleData[i] = new sPuzzleData((WCHAR*)l_pUIImage->GetName(),l_fUV,l_Offset,l_ImageRealPixelSize,l_OriginaleSize,l_ShowPosInPI);
 					    //l_ppPuzzleData[i] = new sPuzzleData(l_pUIImage->GetName(),l_fUV,l_Offset,l_ImageRealPixelSize,l_OriginaleSize,l_rc);
 					    //for debug info
@@ -877,117 +894,6 @@ namespace PI
 		return l_pForm;
 	}
 //end namespace
-}
-
-void SaveFile(const char*e_strFileName,unsigned char*e_pData,size_t e_uiFileSize)
-{
-	int l_iWidth = 0;
-	int l_iHeight = 0;
-	memcpy(&l_iWidth, e_pData, sizeof(int)); e_pData += sizeof(int);
-	memcpy(&l_iHeight, e_pData, sizeof(int)); e_pData += sizeof(int);
-	/*memcpy(&width, RomBuf, sizeof(int));*/ e_pData += sizeof(int);
-	/*memcpy(&height, RomBuf, sizeof(int));*/ e_pData += sizeof(int);
-	SaveBufferToImage(e_strFileName, l_iWidth, l_iHeight, e_pData, 4);
-}
-
-void LoadROMData(const char * chFileName)
-{
-	GLubyte ID[9], ID2[9], ID3[9], bDataReserve;
-	DWORD	length;
-	char TempFileName[128];
-	FILE *file;
-	unsigned char *buffer;
-	int  size;
-	sprintf(TempFileName, "%s", chFileName);
-	file = fopen(TempFileName, "rb");
-	fseek(file, 0, SEEK_END);
-	size = ftell(file);
-	fseek(file, 0, SEEK_SET);
-	buffer = (unsigned char *)malloc(size);
-	if ((buffer != nullptr) && (size != 0))
-	{
-		fread(buffer, size, 1, file);
-	}
-	fclose(file);
-	auto RomData = buffer;
-	auto RomBuf = RomData;
-	ID[8] = '\0';
-	ID2[8] = '\0';
-	ID3[8] = '\0';
-	// 檢查檔案識別碼		
-	memcpy(ID, RomBuf, 8); RomBuf += 8;
-	memcpy(&length, RomBuf, 4); RomBuf += 4;
-	if (memcmp(ID, "ACT_CC2D", 8) && memcmp(ID, "ACT_ZL3D", 8))
-	{
-		assert(0);
-	}
-	int TotalDDS = 0;
-	int TotalETC = 0;
-	int TotalImage = 0;
-	int TotalAction = 0;
-	int TotalFontImage = 0;
-	int l_iIndex = 0;
-	std::string l_strDirectory = UT::GetFileNameWithoutFullPath(chFileName);
-	do
-	{
-		std::string l_strFileName = l_strDirectory;
-		l_strFileName += "/File";
-		l_strFileName += ValueToString(l_iIndex);
-		memcpy(ID, RomBuf, 8); RomBuf += 8;
-		memcpy(&length, RomBuf, 4); RomBuf += 4;
-		++l_iIndex;
-		if (!memcmp(ID, "TGA_OPGL", 8))
-		{ // TGA 圖形 for OpenGL
-
-			memcpy(&bDataReserve, RomBuf, 1); RomBuf += 1;
-			l_strFileName += ".png";
-			SaveFile(l_strFileName.c_str(), RomBuf, length);
-			RomBuf += (length - 1);
-			TotalImage++;
-		}
-		else if (!memcmp(ID, "DDS_OPGL", 8))
-		{ // DDS 圖形
-			l_strFileName += ".dds";
-			SaveFile(l_strFileName.c_str(), RomBuf, length);
-			RomBuf += length;
-			TotalDDS++;
-			TotalImage++;
-		}
-		else if (!memcmp(ID, "ETC_OPGL", 8))
-		{ // DDS 圖形 
-			l_strFileName += ".etc";
-			OutputDebugString(L"etc file:");
-			OutputDebugString(UT::CharToWchar(l_strFileName).c_str());
-			OutputDebugString(L"\n");
-//			SaveFile(l_strFileName.c_str(), RomBuf, length);
-			RomBuf += length;
-			TotalETC++;
-			TotalImage++;
-		}
-		else if (!memcmp(ID, "ACT_DATA", 8))
-		{ // action data                        
-			RomBuf += length;
-		}
-		else if (!memcmp(ID, "FILE_END", 8)) break;// 結束
-		else
-		{
-			RomBuf += length;
-		}
-	} while (1);
-
-	free(buffer);
-}
-void SaveRomFile()
-{
-	auto l_strFileNames = DNCT::OpenFileAndGetNames();
-	if (l_strFileNames)
-	{
-		for each (auto l_strFileName in l_strFileNames)
-		{
-			std::string l_strFinalName = ::GcStringToChar(l_strFileName);
-			LoadROMData(l_strFinalName.c_str());
-		}
-	}
 }
 
 #ifndef USER_CONTROL_ENABLE

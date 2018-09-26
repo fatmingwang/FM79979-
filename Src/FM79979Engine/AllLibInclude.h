@@ -26,6 +26,7 @@
 #pragma comment(lib, "wsock32.lib")
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "Urlmon.lib")
+#pragma comment(lib, "Advapi32.lib")
 #ifdef _DEBUG
 #ifdef USE_MU_PARSER
 	#pragma comment(lib, "../../../lib/Debug/MathParser.lib")

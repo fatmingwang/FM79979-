@@ -175,7 +175,7 @@ namespace FATMING_CORE
 	{
 		virtual	bool	MyParse(TiXmlElement*e_pRoot);
 		void			ProcessAnimationData(TiXmlElement*e_pElement);
-		void			ProcessPuzzleUnit(TiXmlElement*e_pElement);
+		void			ProcessPuzzleUnit(TiXmlElement*e_pElement,int e_iIndex);
 		void			ProcessDataCheck(TiXmlElement*e_pElement);
 		//
 	    //for animation in the pi image

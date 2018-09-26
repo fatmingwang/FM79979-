@@ -21,6 +21,7 @@ enum ePointsToTriangulatorType
 
 class cPuzzleImageUnitTriangulator:public NamedTypedObject
 {
+	bool	m_bEdited;
 	struct s2DVertex
 	{
 		struct s3PosPoints
@@ -71,6 +72,7 @@ public:
 	std::vector<Vector2>*			GetTriangulatorPointsVector() { return &m_TriangleVector; }
 	void							SetTriangulatorPointsVector(std::vector<Vector2>*e_pVector);
 	virtual	TiXmlElement*			ToTiXmlElement();
+	bool							isEdited() { return m_bEdited; }
 };
 
 
@@ -81,6 +83,7 @@ class cPuzzleImageUnitTriangulatorManager:public cNamedTypedObjectVector<cPuzzle
 public:
 	cPuzzleImageUnitTriangulatorManager();
 	~cPuzzleImageUnitTriangulatorManager();
+	bool									IsTriangulatorEdited(cUIImage*e_pUIImage);
 	cPuzzleImageUnitTriangulator*			GetObject(cUIImage*e_pUIImage);
 	void									RemoveObject(cUIImage*e_pUIImage);
 };

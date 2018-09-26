@@ -97,23 +97,27 @@ namespace FATMING_CORE
 
 	void	cTextureManager::AddObjectWithDebugInfo(cTexture*e_pTexture)
 	{
-			assert(GetObjectIndexByName(e_pTexture->GetName()) == -1);
-			AddObjectNeglectExist(e_pTexture);
 #ifdef DEBUG
-			std::wstring l_str = e_pTexture->GetName();
-			l_str += L" add into cTextureManager";
-			FMLog::LogWithFlag(l_str.c_str(), CORE_LOG_FLAG);
+		if (GetObjectIndexByName(e_pTexture->GetName()) != -1)
+		{
+			UT::ErrorMsgByFormat(L"PI same name as PIUnit while it's PI editor");
+		}
+		std::wstring l_str = e_pTexture->GetName();
+		l_str += L" add into cTextureManager";
+		FMLog::LogWithFlag(l_str.c_str(), CORE_LOG_FLAG);
 #endif
+		assert(GetObjectIndexByName(e_pTexture->GetName()) == -1);
+		AddObjectNeglectExist(e_pTexture);
 	}
 	void	cTextureManager::RemoveObjectWithDebugInfo(cTexture*e_pTexture)
 	{
 		assert(GetObjectIndexByName(e_pTexture->GetName()) != -1);
 		RemoveObjectWithoutDelete(e_pTexture);
 #ifdef DEBUG
-		std::wstring l_strFileName = this->GetName();
+		std::wstring l_strFileName = e_pTexture->GetName();
 		l_strFileName += L" destroy:Texture,Ate Ram:";
 		l_strFileName += ValueToStringW((int)g_iAteVideoMomory);
-		FMLog::LogWithFlag(l_strFileName.c_str(), true);
+		FMLog::LogWithFlag(l_strFileName.c_str(), CORE_LOG_FLAG);
 #endif
 		if (Count() == 0)
 		{
