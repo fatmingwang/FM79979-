@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProbabilityStatics", "ProbabilityStatics.vcxproj", "{9F2A3BF3-B04C-4B61-9C05-9D58E917860A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "..\Core\Core.vcxproj", "{D5962A80-CFCF-437A-B224-01C03CF9FD1A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9F2A3BF3-B04C-4B61-9C05-9D58E917860A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9F2A3BF3-B04C-4B61-9C05-9D58E917860A}.Debug|Win32.Build.0 = Debug|Win32
+		{9F2A3BF3-B04C-4B61-9C05-9D58E917860A}.Release|Win32.ActiveCfg = Release|Win32
+		{9F2A3BF3-B04C-4B61-9C05-9D58E917860A}.Release|Win32.Build.0 = Release|Win32
+		{D5962A80-CFCF-437A-B224-01C03CF9FD1A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D5962A80-CFCF-437A-B224-01C03CF9FD1A}.Debug|Win32.Build.0 = Debug|Win32
+		{D5962A80-CFCF-437A-B224-01C03CF9FD1A}.Release|Win32.ActiveCfg = Release|Win32
+		{D5962A80-CFCF-437A-B224-01C03CF9FD1A}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

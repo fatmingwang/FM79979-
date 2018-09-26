@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="books">
+      <UniqueIdentifier>{49be853c-ec21-47e2-a1a2-f1b5f257aa18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="modes">
+      <UniqueIdentifier>{7c319c97-b97a-4370-b3e4-05f4cb01fecd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="books\coupled">
+      <UniqueIdentifier>{de1a7380-e8b3-4f70-9f3b-b63238f376f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="books\floor">
+      <UniqueIdentifier>{fe75f328-5553-4546-8f0d-c6f9db11cb50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="books\uncoupled">
+      <UniqueIdentifier>{d251aa4c-6519-42c1-9416-4b424befaf59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ogg">
+      <UniqueIdentifier>{80baa9b6-7792-4eb0-bf2d-8fe65076c242}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="voribs">
+      <UniqueIdentifier>{df9a9df1-7c1c-4d3e-ba46-e5c6dd5cf115}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Core\Sound\ogg\backends.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\bitrate.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\books\coupled\res_books_stereo.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\books\floor\floor_books.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\books\uncoupled\res_books_uncoupled.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\codebook.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\codec_internal.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\envelope.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\highlevel.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\lookup.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\lookup_data.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\lpc.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\lsp.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\masking.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\mdct.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\misc.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\floor_all.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\psych_11.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\psych_16.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\psych_44.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\psych_8.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\residue_16.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\residue_44.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\residue_44u.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\residue_8.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\setup_11.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\setup_16.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\setup_22.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\setup_32.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\setup_44.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\setup_44u.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\setup_8.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\modes\setup_X.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\os.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\psy.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\registry.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\scales.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\smallft.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\vorbis\codec.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\vorbis\vorbisenc.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\vorbis\vorbisfile.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\window.h" />
+    <ClInclude Include="..\..\Core\Sound\ogg\ogg\ogg.h">
+      <Filter>ogg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Core\Sound\ogg\ogg\os_types.h">
+      <Filter>ogg</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Core\Sound\ogg\analysis.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\barkmel.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\bitrate.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\bitwise.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\block.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\codebook.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\envelope.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\floor0.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\floor1.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\framing.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\info.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\lookup.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\lpc.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\lsp.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\mapping0.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\mdct.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\psy.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\registry.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\res0.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\sharedbook.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\smallft.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\synthesis.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\vorbisenc.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\vorbisfile.c" />
+    <ClCompile Include="..\..\Core\Sound\ogg\window.c" />
+  </ItemGroup>
+</Project>
