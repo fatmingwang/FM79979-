@@ -282,6 +282,8 @@ namespace PI
 						WARNING_MSG(l_strCurrenDirectory+" not exists"+DNCT::GetChanglineString()+l_pExp->ToString());
 					}
 					cUIImage*l_pUIImage = GetNewUIImageByBitMap(l_pBitMap,l_pPuzzleData->strFileName.c_str());
+					if(m_pPuzzleImageUnitTriangulatorManager)
+						this->m_pPuzzleImageUnitTriangulatorManager->AssignDataFromPuzzleImage(e_pPuzzleImage, l_pUIImage);
 					 //cUIImage*l_pUIImage = new cUIImage(DNCT::GcStringToChar(l_strCurrenDirectory+l_strFileName));
 					l_pUIImage->SetOffsetPos(l_pPuzzleData->OffsetPos);
 					POINT	l_RightDown = l_pPuzzleData->OffsetPos+l_pPuzzleData->Size;
@@ -293,7 +295,7 @@ namespace PI
 					l_pUIImage->SetOriginalImageSize(l_OriginalSize);
 					m_pImageomposerIRM->AddObject(l_pUIImage);
 					l_pUIImage->SetPos(Vector3(l_fPosX,l_fPosY,0.f));
-					if(l_pPuzzleData->ShowPosInPI.x!=0||l_pPuzzleData->ShowPosInPI.y!=0)
+					//if(l_pPuzzleData->ShowPosInPI.x!=0||l_pPuzzleData->ShowPosInPI.y!=0)
 					{
 						 l_pUIImage->SetPos(Vector3((float)l_pPuzzleData->ShowPosInPI.x-l_pUIImage->GetOffsetPos()->x,
 								(float)l_pPuzzleData->ShowPosInPI.y-l_pUIImage->GetOffsetPos()->y,0.f));
@@ -358,6 +360,7 @@ namespace PI
 		 m_pImageIndexOfAnimationList->Destroy();
 		 m_pImageomposerIRM->Destroy();
 		 AllImage_listBox->Items->Clear();
+		 m_pPuzzleImageUnitTriangulatorManager->Destroy();
 		 String^l_strFileName = e_strFileName;
 		 if( l_strFileName )
 		 {
@@ -605,6 +608,7 @@ namespace PI
 						    l_rc.top.ToString());
 					    //char*	l_strShowPosInPI = DNCT::GcStringToChar(
 					    //	l_rc.left.ToString()+","+
+
 					    //	l_rc.top.ToString()+","+
 					    //	l_rc.right.ToString()+","+
 					    //	l_rc.bottom.ToString());

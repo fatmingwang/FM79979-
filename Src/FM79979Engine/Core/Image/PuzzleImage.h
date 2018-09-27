@@ -190,7 +190,7 @@ namespace FATMING_CORE
 		//image data uv offset pos and name....
 		sPuzzleData*m_pAllPuzzleData;
 
-		std::vector<std::vector<Vector2> >*	m_pImageShapePointVectorVector;
+		std::vector<std::vector<Vector2>*>*	m_pImageShapePointVectorVector;
 
 		//internal using,generate all image unit while parse data is done
 		void	GenerateAllPuzzleImageUnit();
@@ -198,36 +198,35 @@ namespace FATMING_CORE
 		DEFINE_TYPE_INFO()
 		cPuzzleImage();
 		cPuzzleImage(cPuzzleImage*e_pPuzzleImage);
-		cPuzzleImage(char*e_strName,std::vector<sPuzzleData> *e_pPuzzleDataList,bool e_bGenerateAllUnit = false,bool e_bFetchPixels = false);
+		//cPuzzleImage(char*e_strName,std::vector<sPuzzleData> *e_pPuzzleDataList,bool e_bGenerateAllUnit = false,bool e_bFetchPixels = false);
 		CLONE_MYSELF(cPuzzleImage);
 		virtual ~cPuzzleImage();
 		//for editor
-		static bool m_sbSortPIFileAsOriginal;
+		static bool							m_sbSortPIFileAsOriginal;
 
-		virtual	void	Render()override { cBaseImage::Render(); }
-		void	Render(int e_iIndex);
+		virtual	void						Render()override { cBaseImage::Render(); }
+		void								Render(int e_iIndex);
 		//dump data into destination,so we could delete the source puzzleImage.
 		//void	DumpIntoPuzzleImage(cPuzzleImage*e_pPuzzleImage);
 		//the count as many as GetNum,or instead call (*GetPuzzleDataList())[iIndex]
-		sPuzzleData*	GetAllPuzzleData() { return m_pAllPuzzleData; }
-		sPuzzleData*	GetPuzzleData(int e_iIndex){ return &m_pAllPuzzleData[e_iIndex]; }
-		int				GetNumImage() { return m_iNumImage; }
-		//sPuzzleData*	GetAllPuzzleData(){ return m_pPuzzleData; }
+		sPuzzleData*						GetAllPuzzleData() { return m_pAllPuzzleData; }
+		sPuzzleData*						GetPuzzleData(int e_iIndex){ return &m_pAllPuzzleData[e_iIndex]; }
+		int									GetNumImage() { return m_iNumImage; }
 
-		std::vector<std::vector<Vector2> >*	GetImageShapePointVectorVector();
+		std::vector<std::vector<Vector2>*>*	GetImageShapePointVectorVector();
 		std::vector<Vector2>*				GetImageShapePointVector(int e_iIndex);
 
 		//make sure the Numeral image all have same size,
 		//and it's sequence,and remember delete it after use it,
 		//ensure u have no release puzzle image before delete Numeral image
-		cNumeralImage*	GetNumeralImageByName(const wchar_t*e_strNumerImageName);
-		cNumeralImage*	GetNumeralImageByName(const wchar_t*e_str0ImaneName,const wchar_t*e_str9ImaneName);
+		cNumeralImage*						GetNumeralImageByName(const wchar_t*e_strNumerImageName);
+		cNumeralImage*						GetNumeralImageByName(const wchar_t*e_str0ImaneName,const wchar_t*e_str9ImaneName);
 		//for particle
-		float*   GetAllChildrenTriangleStripUV();
-		float*   GetAllChildrenTwoTriangleUV();
+		float*								GetAllChildrenTriangleStripUV();
+		float*								GetAllChildrenTwoTriangleUV();
 		//
-		static	std::string			GetFileName(const wchar_t*e_strObjectName);
-		static	std::string			GetFileName(const char*e_strObjectName);
+		static	std::string					GetFileName(const wchar_t*e_strObjectName);
+		static	std::string					GetFileName(const char*e_strObjectName);
 		//static	cPuzzleImage*		GetMe(TiXmlElement*e_pElement);
 	};
 }

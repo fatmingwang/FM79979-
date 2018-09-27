@@ -5,8 +5,47 @@
 #include "delaunay_triangulation/triangle.h"
 #include "delaunay_triangulation/delaunay.h"
 extern cGlyphFontRender*g_pDebugFont;
+
+
+void IncreaseLod(std::vector<Vector2> &e_Vector)
+{
+	std::vector<Vector2> NewPoints;
+
+	// keep the first point
+	NewPoints.push_back(e_Vector[0]);
+	for (unsigned int i = 0; i < (e_Vector.size() - 1); ++i) 
+	{
+		// get 2 original points
+		const Vector2& p0 = e_Vector[i];
+		const Vector2& p1 = e_Vector[i + 1];
+		Vector2 Q;
+		Vector2 R;
+
+		// average the 2 original points to create 2 new points. For each
+		// CV, another 2 verts are created.
+		Q.x = 0.75f*p0.x + 0.25f*p1.x;
+		Q.y = 0.75f*p0.y + 0.25f*p1.y;
+		//Q.z = 0.75f*p0.z + 0.25f*p1.z;
+		//Q.z = 0.75f*p0.z + 0.25f*p1.z;
+
+		R.x = 0.25f*p0.x + 0.75f*p1.x;
+		R.y = 0.25f*p0.y + 0.75f*p1.y;
+		//R.z = 0.25f*p0.z + 0.75f*p1.z;
+		//R.z = 0.25f*p0.z + 0.75f*p1.z;
+
+		NewPoints.push_back(Q);
+		NewPoints.push_back(R);
+	}
+	// keep the last point
+	NewPoints.push_back(e_Vector[e_Vector.size() - 1]);
+
+	// update the points array
+	e_Vector = NewPoints;
+}
+
 cPuzzleImageUnitTriangulator::cPuzzleImageUnitTriangulator(cUIImage*e_pTargetImage)
 {
+	m_iMouseClosestPointIndex = -1;
 	m_bEdited = false;
 	m_bWaitForGenerateTriangle = false;
 	m_TriangleVector.reserve(500);
@@ -123,6 +162,7 @@ void cPuzzleImageUnitTriangulator::MouseMove(int e_iPosX, int e_iPosY)
 		PointsToTriangulatorMoveMouseDown(e_iPosX, e_iPosY, eMB_MOVE);
 		break;
 	}
+	this->m_iMouseClosestPointIndex = GetClosestPoint(Vector2(e_iPosX, e_iPosY));
 }
 
 void cPuzzleImageUnitTriangulator::MouseUp(int e_iPosX, int e_iPosY)
@@ -166,13 +206,14 @@ void cPuzzleImageUnitTriangulator::Render()
 		for (int i = 0; i < l_iCount; i++)
 		{
 			Vector4 l_vColor = Vector4::Zero;
-			l_vColor.a = 1.f;
-			if (i<10)
-				l_vColor.r += (i + 1);
-			if (i<20)
-				l_vColor.g += (i + 1);
-			if (i<30)
-				l_vColor.b += (i + 1);
+			l_vColor.a = 0.7f;
+			l_vColor.g = 1.f;
+			//if (i<10)
+			//	l_vColor.r += (i + 1);
+			//if (i<20)
+			//	l_vColor.g += (i + 1);
+			//if (i<30)
+			//	l_vColor.b += (i + 1);
 			std::vector<Vector2>l_vPos;
 			l_vPos.push_back(m_TriangleVector[i*3]);
 			l_vPos.push_back(m_TriangleVector[i * 3+1]);
@@ -183,16 +224,23 @@ void cPuzzleImageUnitTriangulator::Render()
 	}
 	if (g_pDebugFont)
 	{
-		g_pDebugFont->SetLocalTransform(cMatrix44::TranslationMatrix(-18.f,-24.f,0.f)*cMatrix44::ScaleMatrix(Vector3(0.3f, 0.3f, 1)));
+		g_pDebugFont->SetLocalTransform(cMatrix44::TranslationMatrix(-18.f,-24.f,0.f)*cMatrix44::ScaleMatrix(Vector3(0.7f, 0.7f, 1)));
 		for (size_t i = 0; i < m_PointVector.size(); ++i)
 		{
 			auto l_vPos = m_PointVector[i];
-			g_pDebugFont->RenderFont(l_vPos.x, l_vPos.y, ValueToStringW(i).c_str());
+			if (m_iMouseClosestPointIndex == i)
+			{
+				g_pDebugFont->SetColor(Vector4::Red);
+				g_pDebugFont->RenderFont(l_vPos.x, l_vPos.y, ValueToStringW(i).c_str());
+				g_pDebugFont->SetColor(Vector4::One);
+			}
+			else
+				g_pDebugFont->RenderFont(l_vPos.x, l_vPos.y, ValueToStringW(i).c_str());
 		}
 		g_pDebugFont->SetLocalTransform(cMatrix44::ScaleMatrix(Vector3(1, 1, 1)));
 	}
-	RenderTriangleImage(Vector3((float)m_pTargetImage->GetWidth(), (float)m_pTargetImage->GetHeight(),0));
-	GLRender::RenderRectangle(1000,1000,cMatrix44::Identity,Vector4::Red);
+	RenderTriangleImage(Vector3((float)m_pTargetImage->GetWidth()+100, 0,0));
+	//GLRender::RenderRectangle(1000,1000,cMatrix44::Identity,Vector4::Red);
 }
 
 void	cPuzzleImageUnitTriangulator::RenderTriangleImage(Vector3 e_vPos)
@@ -205,9 +253,10 @@ void	cPuzzleImageUnitTriangulator::RenderTriangleImage(Vector3 e_vPos)
 	}
 }
 
-void	cPuzzleImageUnitTriangulator::SetTriangulatorPointsVector(std::vector<Vector2>*e_pVector)
+void	cPuzzleImageUnitTriangulator::SetPointsVector(std::vector<Vector2>*e_pVector)
 {
-
+	m_PointVector = *e_pVector;
+	this->GenerateTriangle();
 }
 
 TiXmlElement* cPuzzleImageUnitTriangulator::ToTiXmlElement()
@@ -256,6 +305,7 @@ void cPuzzleImageUnitTriangulator::GenerateTriangle()
 
 void cPuzzleImageUnitTriangulator::PointsToTriangulatorAddMouseDown(int e_iPosX, int e_iPosY, eMouseBehavior e_eMouseBehavior)
 {
+	MousePosAdjustToImageRectangle(e_iPosX, e_iPosY);
 	switch (e_eMouseBehavior)
 	{
 	case eMB_DOWN:
@@ -275,6 +325,7 @@ void cPuzzleImageUnitTriangulator::PointsToTriangulatorAddMouseDown(int e_iPosX,
 
 void cPuzzleImageUnitTriangulator::PointsToTriangulatorDeleteMouseDown(int e_iPosX, int e_iPosY, eMouseBehavior e_eMouseBehavior)
 {
+	MousePosAdjustToImageRectangle(e_iPosX, e_iPosY);
 	switch (e_eMouseBehavior)
 	{
 	case eMB_DOWN:
@@ -293,6 +344,7 @@ void cPuzzleImageUnitTriangulator::PointsToTriangulatorDeleteMouseDown(int e_iPo
 
 void cPuzzleImageUnitTriangulator::PointsToTriangulatorMoveMouseDown(int e_iPosX, int e_iPosY, eMouseBehavior e_eMouseBehavior)
 {
+	MousePosAdjustToImageRectangle(e_iPosX, e_iPosY);
 	switch (e_eMouseBehavior)
 	{
 	case eMB_DOWN:
@@ -312,12 +364,39 @@ void cPuzzleImageUnitTriangulator::PointsToTriangulatorMoveMouseDown(int e_iPosX
 	}
 }
 
+void	cPuzzleImageUnitTriangulator::MousePosAdjustToImageRectangle(int &e_iPosX, int &e_iPosY)
+{
+	if (m_pTargetImage)
+	{
+		if (e_iPosX < 0)
+			e_iPosX = 0;
+		if (e_iPosX > m_pTargetImage->GetWidth())
+			e_iPosX = m_pTargetImage->GetWidth();
+		if (e_iPosY < 0)
+			e_iPosY = 0;
+		if (e_iPosY > m_pTargetImage->GetHeight())
+			e_iPosY = m_pTargetImage->GetHeight();
+	}
+}
+
 cPuzzleImageUnitTriangulatorManager::cPuzzleImageUnitTriangulatorManager()
 {
 }
 
 cPuzzleImageUnitTriangulatorManager::~cPuzzleImageUnitTriangulatorManager()
 {
+}
+
+void	cPuzzleImageUnitTriangulatorManager::AssignDataFromPuzzleImage(cPuzzleImage*e_pPI, cUIImage*e_pUIImage)
+{
+	int l_iIndex = e_pPI->GetObjectIndexByName(e_pUIImage->GetName());
+	if (l_iIndex != -1)
+	{
+		cPuzzleImageUnitTriangulator*l_pPuzzleImageUnitTriangulator = GetObject(e_pUIImage);
+		std::vector<Vector2>*l_pPointsVector = e_pPI->GetImageShapePointVector(l_iIndex);
+		if(l_pPointsVector)
+			l_pPuzzleImageUnitTriangulator->SetPointsVector(l_pPointsVector);
+	}
 }
 
 bool	cPuzzleImageUnitTriangulatorManager::IsTriangulatorEdited(cUIImage*e_pUIImage)
@@ -334,7 +413,7 @@ bool	cPuzzleImageUnitTriangulatorManager::IsTriangulatorEdited(cUIImage*e_pUIIma
 	return false;
 }
 
-cPuzzleImageUnitTriangulator * cPuzzleImageUnitTriangulatorManager::GetObject(cUIImage*e_pUIImage)
+cPuzzleImageUnitTriangulator* cPuzzleImageUnitTriangulatorManager::GetObject(cUIImage*e_pUIImage)
 {
 	int l_iCount = this->Count();
 	for (int i = 0; i < l_iCount; i++)

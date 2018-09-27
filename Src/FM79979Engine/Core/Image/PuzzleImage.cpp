@@ -134,7 +134,7 @@ namespace FATMING_CORE
 
 	cPuzzleImage::cPuzzleImage():cBaseImage(L"cPuzzleImage")
 	{
-		m_pImageShapePointVectorVector = nullptr;
+		m_pImageShapePointVectorVector = new std::vector<std::vector<Vector2>*>();
 		m_pImageIndexOfAnimation = nullptr;
 		m_iNumImage = 0;
 		m_pAllPuzzleData = nullptr;
@@ -153,30 +153,30 @@ namespace FATMING_CORE
 		this->CopyListPointer(e_pPuzzleImage);
 	}
 
-	cPuzzleImage::cPuzzleImage(char*e_strName,std::vector<sPuzzleData> *e_pPuzzleDataList,bool e_bGenerateAllUnit,bool e_bFetchPixels)
-	:cBaseImage(e_strName,e_bFetchPixels)
-	{
-		m_pImageShapePointVectorVector = nullptr;
-		m_pImageIndexOfAnimation = nullptr;
-		m_pfAllChildrenTriangleStripUV = nullptr;
-		m_pfAllChildrenTwoTriangleUV = nullptr;
-		if( e_pPuzzleDataList )
-		{
-			m_pAllPuzzleData = new sPuzzleData[e_pPuzzleDataList->size()];
-			m_iNumImage = (int)e_pPuzzleDataList->size();
-			for( int i=0;i<m_iNumImage;++i )
-			{
-				sPuzzleData l_DestsPuzzleData = (*e_pPuzzleDataList)[i];
-				m_pAllPuzzleData[i] = sPuzzleData(l_DestsPuzzleData.strFileName.c_str(),l_DestsPuzzleData.fUV,l_DestsPuzzleData.OffsetPos,l_DestsPuzzleData.Size,l_DestsPuzzleData.OriginalSize,l_DestsPuzzleData.ShowPosInPI);
-				if( e_bGenerateAllUnit )
-				{
-					cPuzzleImageUnit*l_p = new cPuzzleImageUnit(&m_pAllPuzzleData[i],this);
-					l_p->SetName(m_pAllPuzzleData[i].strFileName);
-					this->AddObject(l_p);
-				}
-			}
-		}
-	}
+	//cPuzzleImage::cPuzzleImage(char*e_strName,std::vector<sPuzzleData> *e_pPuzzleDataList,bool e_bGenerateAllUnit,bool e_bFetchPixels)
+	//:cBaseImage(e_strName,e_bFetchPixels)
+	//{
+	//	m_pImageShapePointVectorVector = new std::vector<std::vector<Vector2>*>();
+	//	m_pImageIndexOfAnimation = nullptr;
+	//	m_pfAllChildrenTriangleStripUV = nullptr;
+	//	m_pfAllChildrenTwoTriangleUV = nullptr;
+	//	if( e_pPuzzleDataList )
+	//	{
+	//		m_pAllPuzzleData = new sPuzzleData[e_pPuzzleDataList->size()];
+	//		m_iNumImage = (int)e_pPuzzleDataList->size();
+	//		for( int i=0;i<m_iNumImage;++i )
+	//		{
+	//			sPuzzleData l_DestsPuzzleData = (*e_pPuzzleDataList)[i];
+	//			m_pAllPuzzleData[i] = sPuzzleData(l_DestsPuzzleData.strFileName.c_str(),l_DestsPuzzleData.fUV,l_DestsPuzzleData.OffsetPos,l_DestsPuzzleData.Size,l_DestsPuzzleData.OriginalSize,l_DestsPuzzleData.ShowPosInPI);
+	//			if( e_bGenerateAllUnit )
+	//			{
+	//				cPuzzleImageUnit*l_p = new cPuzzleImageUnit(&m_pAllPuzzleData[i],this);
+	//				l_p->SetName(m_pAllPuzzleData[i].strFileName);
+	//				this->AddObject(l_p);
+	//			}
+	//		}
+	//	}
+	//}
 
 	cPuzzleImage::~cPuzzleImage()
 	{
@@ -305,6 +305,7 @@ namespace FATMING_CORE
 	//<PuzzleUnit Name = "GoldCoin5" UV = "0.7901235,0,0.9845679,0.2386364" OffsetPos = "0,0" Size = "63,63" OriginalSize = "63,63" ShowPosInPI = "256,0" / >
 	void cPuzzleImage::ProcessPuzzleUnit(TiXmlElement* e_pElement, int e_iIndex)
 	{
+		std::vector<Vector2>*l_pTriangulatorVector = nullptr;
 		sPuzzleData*l_pPuzzleData = &m_pAllPuzzleData[e_iIndex];
 		PARSE_ELEMENT_START(e_pElement)
 			COMPARE_NAME("Name")
@@ -343,8 +344,15 @@ namespace FATMING_CORE
 				//int a=0;
 
 			}
+			else
+			COMPARE_NAME("TriangulatorPoints")
+			{
+				l_pTriangulatorVector = new std::vector<Vector2>;
+				*l_pTriangulatorVector = StringToVector2Vector(l_strValue);
+			}
 		PARSE_NAME_VALUE_END
-//		l_pPuzzleDataList->push_back(l_sPuzzleData);
+		if(m_pImageShapePointVectorVector)
+			m_pImageShapePointVectorVector->push_back(l_pTriangulatorVector);
 	}
 	//<PuzzleImage OriginalNameSort="background_0001,BG_01_Plant_00000,BG_01_Plant_00001,BG_01_Plant_00002,BG_01_Plant_00003,BG_01_Darker" ImageName="BG_01.png" Count="6" GeneratePuzzleimageUnit="0">
 	void cPuzzleImage::ProcessDataCheck(TiXmlElement*e_pElement)
@@ -361,7 +369,14 @@ namespace FATMING_CORE
 #ifdef DEBUG
 				int l_iCount = this->Count();
 				if(l_iCount != _wtoi(l_strValue))
-					assert(0&&"ProcessPuzzleImageTexture() count is not correct");
+					assert(0&&"cPuzzleImage::ProcessDataCheck() count is not correct");
+				if (m_pImageShapePointVectorVector)
+				{
+					if (l_iCount != (int)m_pImageShapePointVectorVector->size())
+					{
+						assert(0 && "cPuzzleImage::ProcessDataCheck():m_pImageShapePointVectorVector count is not correct");
+					}
+				}
 #endif
 			}
 			else
@@ -376,7 +391,8 @@ namespace FATMING_CORE
 				if(m_sbSortPIFileAsOriginal)
 				{
 					wchar_t*l_ImageName = wcstok((wchar_t*)l_strValue,L",");
-					std::vector<cPuzzleImageUnit*>	l_PuzzleImageUnitVector;
+					std::vector<cPuzzleImageUnit*>		l_PuzzleImageUnitVector;
+					std::vector<std::vector<Vector2>*>	l_TriangulatorPointsVectorVector;
 					while(l_ImageName)
 					{
 						int l_iCount = Count();
@@ -385,6 +401,11 @@ namespace FATMING_CORE
 							if(!wcscmp((*this)[i]->GetName(),l_ImageName))
 							{
 								l_PuzzleImageUnitVector.push_back((*this)[i]);
+								if (m_pImageShapePointVectorVector)
+								{
+									l_TriangulatorPointsVectorVector.push_back((*m_pImageShapePointVectorVector)[i]);
+									m_pImageShapePointVectorVector->erase(m_pImageShapePointVectorVector->begin() + i);
+								}
 								this->RemoveObjectWithoutDelete(i);
 								break;
 							}
@@ -395,6 +416,8 @@ namespace FATMING_CORE
 					for (size_t i = 0; i < l_uiSize; i++)
 					{
 						this->AddObjectNeglectExist(l_PuzzleImageUnitVector[i]);
+						if (m_pImageShapePointVectorVector)
+							m_pImageShapePointVectorVector->push_back(l_TriangulatorPointsVectorVector[i]);
 					}
 				}
 			}
@@ -486,14 +509,14 @@ namespace FATMING_CORE
 		return 0;	
 	}
 
-	std::vector<std::vector<Vector2>>* cPuzzleImage::GetImageShapePointVectorVector()
+	std::vector<std::vector<Vector2>*>* cPuzzleImage::GetImageShapePointVectorVector()
 	{
 		return m_pImageShapePointVectorVector;
 	}
 
 	std::vector<Vector2>* cPuzzleImage::GetImageShapePointVector(int e_iIndex)
 	{
-		return &(*m_pImageShapePointVectorVector)[e_iIndex];
+		return (*m_pImageShapePointVectorVector)[e_iIndex];
 	}
 
 	cNumeralImage*	cPuzzleImage::GetNumeralImageByName(const wchar_t*e_strNumerImageName)

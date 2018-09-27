@@ -18,7 +18,7 @@ enum ePointsToTriangulatorType
 	ePTPT_DELETE,
 	ePTPT_MAX,
 };
-
+//this should mix cCurve
 class cPuzzleImageUnitTriangulator:public NamedTypedObject
 {
 	bool	m_bEdited;
@@ -48,6 +48,7 @@ class cPuzzleImageUnitTriangulator:public NamedTypedObject
 	GET_SET_DEC(cUIImage*,m_pTargetImage,GetTargetImage,SetTargetImage);
 	int							GetClosestPoint(Vector2 e_vPos);
 	int							m_iFocusPoint;				//which one point is closest point
+	int							m_iMouseClosestPointIndex;				//which one point is closest point
 	bool						m_bWaitForGenerateTriangle;
 	void						GenerateTriangle();
 	sMouseMoveData				m_MouseMoveData;
@@ -60,6 +61,7 @@ class cPuzzleImageUnitTriangulator:public NamedTypedObject
 	void							PointsToTriangulatorAddMouseDown(int e_iPosX, int e_iPosY, eMouseBehavior e_eMouseBehavior);
 	void							PointsToTriangulatorDeleteMouseDown(int e_iPosX, int e_iPosY, eMouseBehavior e_eMouseBehavior);
 	void							PointsToTriangulatorMoveMouseDown(int e_iPosX, int e_iPosY, eMouseBehavior e_eMouseBehavior);
+	void							MousePosAdjustToImageRectangle(int &e_iPosX, int &e_iPosY);
 public:
 	cPuzzleImageUnitTriangulator(cUIImage*e_pTargetImage);
 	//cPuzzleImageUnitTriangulator(TiXmlElement*e_pTiXmlElement);
@@ -70,7 +72,7 @@ public:
 	void							Render();
 	void							RenderTriangleImage(Vector3 e_vPos);
 	std::vector<Vector2>*			GetTriangulatorPointsVector() { return &m_TriangleVector; }
-	void							SetTriangulatorPointsVector(std::vector<Vector2>*e_pVector);
+	void							SetPointsVector(std::vector<Vector2>*e_pVector);
 	virtual	TiXmlElement*			ToTiXmlElement();
 	bool							isEdited() { return m_bEdited; }
 };
@@ -83,6 +85,7 @@ class cPuzzleImageUnitTriangulatorManager:public cNamedTypedObjectVector<cPuzzle
 public:
 	cPuzzleImageUnitTriangulatorManager();
 	~cPuzzleImageUnitTriangulatorManager();
+	void									AssignDataFromPuzzleImage(cPuzzleImage*e_pPI,cUIImage*e_pUIImage);
 	bool									IsTriangulatorEdited(cUIImage*e_pUIImage);
 	cPuzzleImageUnitTriangulator*			GetObject(cUIImage*e_pUIImage);
 	void									RemoveObject(cUIImage*e_pUIImage);

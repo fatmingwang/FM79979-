@@ -1416,6 +1416,7 @@ namespace PI
 			this->ImageTriangulatorLOD_numericUpDown->Size = System::Drawing::Size(120, 22);
 			this->ImageTriangulatorLOD_numericUpDown->TabIndex = 91;
 			this->ImageTriangulatorLOD_numericUpDown->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
+			this->ImageTriangulatorLOD_numericUpDown->ValueChanged += gcnew System::EventHandler(this, &cPIEditor::ImageTriangulatorLOD_numericUpDown_ValueChanged);
 			// 
 			// ImageTriangulatorLOD_label
 			// 
@@ -1753,9 +1754,12 @@ namespace PI
 							}
 						}
 					}
-					//for final image size
-					POINT	l_Pos = { 0,0 };
-					RenderRectangle(l_Pos, (int)ImageWidth_numericUpDown->Value, (int)ImageHeight_numericUpDown->Value, Vector4(1.f, 0.3f, 0.3f, 0.3f));
+					if (tabControl1->SelectedIndex != 2)
+					{
+						//for final image size
+						POINT	l_Pos = { 0,0 };
+						RenderRectangle(l_Pos, (int)ImageWidth_numericUpDown->Value, (int)ImageHeight_numericUpDown->Value, Vector4(1.f, 0.3f, 0.3f, 0.3f));
+					}
 					if (m_pDebugFont)
 					{
 						UseShaderProgram();
@@ -2784,6 +2788,9 @@ private: System::Void AddNewPIUnitImage_button_Click(System::Object^  sender, Sy
 				//l_pOriginalImage->Save("Original.png");
 			}
 		}
+	}
+	private: System::Void ImageTriangulatorLOD_numericUpDown_ValueChanged(System::Object^  sender, System::EventArgs^  e) 
+	{
 	}
 };
 	static GCFORM::Form^CallForm(System::String^e_strFileName);
