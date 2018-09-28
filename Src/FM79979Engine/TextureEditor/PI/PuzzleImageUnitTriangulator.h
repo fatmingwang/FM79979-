@@ -24,28 +24,23 @@ class cPuzzleImageUnitTriangulator:public NamedTypedObject
 	bool	m_bEdited;
 	struct s2DVertex
 	{
-		struct s3PosPoints
-		{
-			Vector3 vPos[3];
-		};
-		struct s3UVPoints
-		{
-			Vector2 vUV[3];
-		};
-		struct s3ColorPoints
-		{
-			Vector4 vColor[3];
-		};
+		struct s3PosPoints{Vector3 vPos[3];};
+		struct s3UVPoints{Vector2 vUV[3];};
+		struct s3ColorPoints{Vector4 vColor[3];};
 		std::vector<s3PosPoints>	vPosVector;
 		std::vector<s3UVPoints>		vUVVector;
 		std::vector<s3ColorPoints>	vColorVector;
 	};
 	s2DVertex					m_s2DVertex;
 	std::vector<Vector2>		m_PointVector;
+	std::vector<Vector2>		m_LODPointVector;
 	std::vector<Vector2>		m_TriangleVector;
+	int							m_iLOD;
+	std::vector<Vector2>		m_RenderingTriangleVector;
 	bool						GetImageBoard(Vector2*e_p4VectorPointer);
 	GET_SET_DEC(ePointsToTriangulatorType,m_ePointsToTriangulatorType,GetPointsToTriangulatorType,SetPointsToTriangulatorType);
 	GET_SET_DEC(cUIImage*,m_pTargetImage,GetTargetImage,SetTargetImage);
+	cUIImage*					m_pReferenceImage;
 	int							GetClosestPoint(Vector2 e_vPos);
 	int							m_iFocusPoint;				//which one point is closest point
 	int							m_iMouseClosestPointIndex;				//which one point is closest point
@@ -70,10 +65,13 @@ public:
 	void    						MouseMove(int e_iPosX, int e_iPosY);
 	void    						MouseUp(int e_iPosX, int e_iPosY);
 	void							Render();
+	void							RenderPointsShapeLine();
 	void							RenderTriangleImage(Vector3 e_vPos);
 	std::vector<Vector2>*			GetTriangulatorPointsVector() { return &m_TriangleVector; }
 	void							SetPointsVector(std::vector<Vector2>*e_pVector);
+	std::vector<Vector2>*			GetPointsVector();
 	virtual	TiXmlElement*			ToTiXmlElement();
+	bool							SetLOD(int e_iLODIndex,bool e_bForceUpdate);
 	bool							isEdited() { return m_bEdited; }
 };
 
@@ -89,4 +87,5 @@ public:
 	bool									IsTriangulatorEdited(cUIImage*e_pUIImage);
 	cPuzzleImageUnitTriangulator*			GetObject(cUIImage*e_pUIImage);
 	void									RemoveObject(cUIImage*e_pUIImage);
+	void									RenderPointsShapeLine();
 };

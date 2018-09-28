@@ -13,50 +13,62 @@
 using namespace System::Drawing::Imaging;
 namespace PI
 {
+
+	System::Drawing::Bitmap^	ImageWithTrianulator(System::Drawing::Bitmap^e_pSrc, std::vector<Vector2>*e_pVector)
+	{
+		if (e_pVector)
+		{
+			List<System::Drawing::Point>^l_pPointList = Vector2ToListPoint(e_pVector);
+			Image^l_pImage = (Image^)e_pSrc;
+			Bitmap^l_pFinalImage = GetSelectedArea(l_pImage, Color::Transparent, l_pPointList);
+			return l_pFinalImage;
+		}
+		return nullptr;
+	}
+
 	//e_SrcPosition for Src's memory to change
 	//e_DestPosition for Dest data for copy.
 	//it will add 1 for e_SrcPosition,e_DestPosition
-	void	CopyImageToImageBySpecificData(System::Drawing::Bitmap^e_pSrc,System::Drawing::Bitmap^e_pDest,
-		RECT e_SrcPosition,RECT e_DestPosition)
+	void	CopyImageToImageBySpecificData(System::Drawing::Bitmap^e_pSrc,System::Drawing::Bitmap^e_pDest,RECT e_SrcPosition,RECT e_DestPosition)
 	{
 		e_DestPosition.right += 1;
 		e_DestPosition.bottom +=1;
 		e_SrcPosition.right += 1;
 		e_SrcPosition.bottom += 1;
 		int	l_iSrcChannel = e_pSrc->PixelFormat == PixelFormat::Format32bppArgb?4:3;
-		if( e_pSrc->PixelFormat == e_pDest->PixelFormat && e_pDest->Width>=e_pSrc->Width && e_pDest->Height>=e_pSrc->Height )
-		{
-			int	bufferSizeInPixels = e_pSrc->Width*e_pSrc->Height;
-			BitmapData^l_pData  = e_pSrc->LockBits(System::Drawing::Rectangle(0, 0,e_pSrc->Width,e_pSrc->Height),ImageLockMode::ReadOnly,e_pSrc->PixelFormat);
-			char*l_pbuff = (char*)l_pData->Scan0.ToPointer();
-			BitmapData^l_pData2 = e_pDest->LockBits(System::Drawing::Rectangle(0,0,e_pDest->Width,e_pDest->Height),ImageLockMode::WriteOnly,e_pDest->PixelFormat);
-			char*l_strScrData = (char*)l_pData2->Scan0.ToPointer();
-			int	l_iSrcRenderStartPosX = e_SrcPosition.left;
-			int	l_iSrcRenderStartPosY = e_SrcPosition.top;
-			int	l_iSrcRenderEndPosX = e_SrcPosition.right;
-			int	l_iSrcRenderEndPosY = e_SrcPosition.bottom;
-			int	l_iDestRenderPosX = e_DestPosition.left;
-			int	l_iDestRenderPosY = e_DestPosition.top;
-			//src's pixels for copy
-			int	l_iWorkPixelX = e_SrcPosition.right-e_SrcPosition.left;
-			int	l_iWorkPixelY = e_SrcPosition.bottom-e_SrcPosition.top;
-			int	l_iIndex = 0;
-			for( int l_iStartPixelY=l_iSrcRenderStartPosY;l_iStartPixelY<l_iSrcRenderEndPosY;++l_iStartPixelY )
-			{
-				int	l_iYIndex = ((l_iDestRenderPosY+l_iIndex)*l_iSrcChannel*e_pDest->Width);
-				int	l_iXIndex = l_iSrcChannel*l_iDestRenderPosX;
-				int	l_iStartCopyIndex = l_iXIndex+l_iYIndex;
-				int	l_iCopyIntoIndex = (l_iStartPixelY*l_iSrcChannel*e_pSrc->Width)+(l_iSrcChannel*l_iSrcRenderStartPosX);
-				memcpy(&l_strScrData[l_iStartCopyIndex],&l_pbuff[l_iCopyIntoIndex],l_iWorkPixelX*l_iSrcChannel);
-				++l_iIndex;
-			}
-			e_pSrc->UnlockBits(l_pData);
-			e_pDest->UnlockBits(l_pData2);
-		}
-		else
+		//if( e_pSrc->PixelFormat == e_pDest->PixelFormat && e_pDest->Width>=e_pSrc->Width && e_pDest->Height>=e_pSrc->Height )
+		//{
+		//	int	bufferSizeInPixels = e_pSrc->Width*e_pSrc->Height;
+		//	BitmapData^l_pData  = e_pSrc->LockBits(System::Drawing::Rectangle(0, 0,e_pSrc->Width,e_pSrc->Height),ImageLockMode::ReadOnly,e_pSrc->PixelFormat);
+		//	char*l_pbuff = (char*)l_pData->Scan0.ToPointer();
+		//	BitmapData^l_pData2 = e_pDest->LockBits(System::Drawing::Rectangle(0,0,e_pDest->Width,e_pDest->Height),ImageLockMode::WriteOnly,e_pDest->PixelFormat);
+		//	char*l_strScrData = (char*)l_pData2->Scan0.ToPointer();
+		//	int	l_iSrcRenderStartPosX = e_SrcPosition.left;
+		//	int	l_iSrcRenderStartPosY = e_SrcPosition.top;
+		//	int	l_iSrcRenderEndPosX = e_SrcPosition.right;
+		//	int	l_iSrcRenderEndPosY = e_SrcPosition.bottom;
+		//	int	l_iDestRenderPosX = e_DestPosition.left;
+		//	int	l_iDestRenderPosY = e_DestPosition.top;
+		//	//src's pixels for copy
+		//	int	l_iWorkPixelX = e_SrcPosition.right-e_SrcPosition.left;
+		//	int	l_iWorkPixelY = e_SrcPosition.bottom-e_SrcPosition.top;
+		//	int	l_iIndex = 0;
+		//	for( int l_iStartPixelY=l_iSrcRenderStartPosY;l_iStartPixelY<l_iSrcRenderEndPosY;++l_iStartPixelY )
+		//	{
+		//		int	l_iYIndex = ((l_iDestRenderPosY+l_iIndex)*l_iSrcChannel*e_pDest->Width);
+		//		int	l_iXIndex = l_iSrcChannel*l_iDestRenderPosX;
+		//		int	l_iStartCopyIndex = l_iXIndex+l_iYIndex;
+		//		int	l_iCopyIntoIndex = (l_iStartPixelY*l_iSrcChannel*e_pSrc->Width)+(l_iSrcChannel*l_iSrcRenderStartPosX);
+		//		memcpy(&l_strScrData[l_iStartCopyIndex],&l_pbuff[l_iCopyIntoIndex],l_iWorkPixelX*l_iSrcChannel);
+		//		++l_iIndex;
+		//	}
+		//	e_pSrc->UnlockBits(l_pData);
+		//	e_pDest->UnlockBits(l_pData2);
+		//}
+		//else
 		{
 			System::Drawing::Graphics^ l_pGr = System::Drawing::Graphics::FromImage(e_pDest);
-			l_pGr->CompositingMode = System::Drawing::Drawing2D::CompositingMode::SourceCopy;
+			l_pGr->CompositingMode = System::Drawing::Drawing2D::CompositingMode::SourceOver;
 			l_pGr->DrawImage(e_pSrc,
 				System::Drawing::Rectangle(e_DestPosition.left,e_DestPosition.top,e_DestPosition.right-e_DestPosition.left,e_DestPosition.bottom-e_DestPosition.top)
 				,System::Drawing::Rectangle(e_SrcPosition.left,e_SrcPosition.top,e_SrcPosition.right-e_SrcPosition.left,e_SrcPosition.bottom-e_SrcPosition.top)
@@ -158,7 +170,7 @@ namespace PI
 		std::wstring	m_strAttachParentName;
 		Vector3			m_vRelativePos;
 	};
-
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
 	bool	cPIEditor::ParsePuzzleImage(cPuzzleImage*e_pPuzzleImage,String^e_strFileName)
 	{
 		cNamedTypedObjectVector<cPuzzleUnitChild>	l_PIUnitChildVector;
@@ -281,9 +293,19 @@ namespace PI
 					{
 						WARNING_MSG(l_strCurrenDirectory+" not exists"+DNCT::GetChanglineString()+l_pExp->ToString());
 					}
-					cUIImage*l_pUIImage = GetNewUIImageByBitMap(l_pBitMap,l_pPuzzleData->strFileName.c_str());
-					if(m_pPuzzleImageUnitTriangulatorManager)
-						this->m_pPuzzleImageUnitTriangulatorManager->AssignDataFromPuzzleImage(e_pPuzzleImage, l_pUIImage);
+
+					if (m_pPuzzleImageUnitTriangulatorManager)
+					{
+						std::vector<Vector2>*l_pPointsVector = e_pPuzzleImage->GetImageShapePointVector(i);
+						if (l_pPointsVector)
+						{
+							auto l_pTriangulatorBitmap = ImageWithTrianulator(l_pBitMap, l_pPointsVector);
+							l_pTriangulatorBitmap->Save(DNCT::WcharToGcstring(l_pPuzzleData->strFileName) + ".png");
+							l_pBitMap = l_pTriangulatorBitmap;
+							m_ImageTale[gcnew String(DNCT::WcharToGcstring(l_pPuzzleData->strFileName))] = l_pBitMap;
+						}
+					}
+					cUIImage*l_pUIImage = GetNewUIImageByBitMap(l_pBitMap, l_pPuzzleData->strFileName.c_str());
 					 //cUIImage*l_pUIImage = new cUIImage(DNCT::GcStringToChar(l_strCurrenDirectory+l_strFileName));
 					l_pUIImage->SetOffsetPos(l_pPuzzleData->OffsetPos);
 					POINT	l_RightDown = l_pPuzzleData->OffsetPos+l_pPuzzleData->Size;
@@ -295,6 +317,7 @@ namespace PI
 					l_pUIImage->SetOriginalImageSize(l_OriginalSize);
 					m_pImageomposerIRM->AddObject(l_pUIImage);
 					l_pUIImage->SetPos(Vector3(l_fPosX,l_fPosY,0.f));
+					this->m_pPuzzleImageUnitTriangulatorManager->AssignDataFromPuzzleImage(e_pPuzzleImage, l_pUIImage);
 					//if(l_pPuzzleData->ShowPosInPI.x!=0||l_pPuzzleData->ShowPosInPI.y!=0)
 					{
 						 l_pUIImage->SetPos(Vector3((float)l_pPuzzleData->ShowPosInPI.x-l_pUIImage->GetOffsetPos()->x,
@@ -541,8 +564,10 @@ namespace PI
 					if( !e_bBinary )
 					{
 						System::Drawing::Bitmap^l_pBitmapForSave = nullptr;
-						if( !l_pUIImage->m_pEditorAttachParent )
+						if (!l_pUIImage->m_pEditorAttachParent)
+						{
 							l_pBitmapForSave = (System::Drawing::Bitmap^)m_ImageTale[l_pImageListBox->Items[i]->ToString()];
+						}
 						//System::Drawing::Rectangle	l_UIIMageRealPixelRect(
 						//    l_pUIImage->GetOffsetPos()->x,
 						   // l_pUIImage->GetOffsetPos()->y,
@@ -566,8 +591,10 @@ namespace PI
 											StripFloatIfBiggerThanPoint5(l_pUIImage->GetPos().y+l_pUIImage->GetOffsetPos()->y),
 											l_rcDrc.left+l_rcSrc.right-l_rcSrc.left,
 											l_rcDrc.top+l_rcSrc.bottom-l_rcSrc.top};
-						if( l_pBitmapForSave )
-							CopyImageToImageBySpecificData(l_pBitmapForSave,l_pBitMap,l_rcSrc,l_rcDrc);
+						if (l_pBitmapForSave)
+						{
+							CopyImageToImageBySpecificData(l_pBitmapForSave, l_pBitMap, l_rcSrc, l_rcDrc);
+						}
 					}
 				    //write xml	data
 				    //UV,LTRB
