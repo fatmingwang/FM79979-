@@ -2011,6 +2011,7 @@ private: System::Windows::Forms::NumericUpDown^  AnimationTime_numericUpDown;
 						if (m_pCurrentSelectedPuzzleImageUnitTriangulator && TriangulatorMouseBehavior_comboBox->SelectedIndex != -1)
 						{
 							m_pCurrentSelectedPuzzleImageUnitTriangulator->SetPointsToTriangulatorType((ePointsToTriangulatorType)TriangulatorMouseBehavior_comboBox->SelectedIndex);
+							ImageTriangulatorLOD_numericUpDown->Value = m_pCurrentSelectedPuzzleImageUnitTriangulator->GetLOD();
 						}
 					}
 					NewPIUnitName_textBox->Text = DNCT::WcharToGcstring(l_pUIImage->GetName());
@@ -2827,7 +2828,8 @@ private: System::Void AddNewPIUnitImage_button_Click(System::Object^  sender, Sy
 	{
 		if (this->m_pCurrentSelectedPuzzleImageUnitTriangulator)
 		{
-			m_pCurrentSelectedPuzzleImageUnitTriangulator->SetLOD((int)ImageTriangulatorLOD_numericUpDown->Value, false);
+			if(m_pCurrentSelectedPuzzleImageUnitTriangulator->GetLOD() != (int)ImageTriangulatorLOD_numericUpDown->Value)
+				m_pCurrentSelectedPuzzleImageUnitTriangulator->SetLOD((int)ImageTriangulatorLOD_numericUpDown->Value, false);
 		}
 	}
 	private: System::Void AnimationData_listBox_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e)

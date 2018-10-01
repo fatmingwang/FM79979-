@@ -70,8 +70,9 @@ public:
 	std::vector<Vector2>*			GetTriangulatorPointsVector() { return &m_TriangleVector; }
 	void							SetPointsVector(std::vector<Vector2>*e_pVector);
 	std::vector<Vector2>*			GetPointsVector();
-	virtual	TiXmlElement*			ToTiXmlElement();
+	//virtual	TiXmlElement*			ToTiXmlElement();
 	bool							SetLOD(int e_iLODIndex,bool e_bForceUpdate);
+	int								GetLOD();
 	bool							isEdited() { return m_bEdited; }
 };
 
@@ -89,3 +90,5 @@ public:
 	void									RemoveObject(cUIImage*e_pUIImage);
 	void									RenderPointsShapeLine();
 };
+
+std::vector<Vector2>	Triangulator(std::vector<Vector2>*e_pData);

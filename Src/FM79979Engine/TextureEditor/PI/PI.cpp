@@ -7,6 +7,7 @@
 #include "../../AllLibInclude.h"
 #pragma comment(lib, "../../../lib/Devil.lib")
 #include "../../Core/GameplayUT/StringCompress.h"
+
 //#include "../../../include/vld.h"
 //#pragma comment(lib, "../../../lib/vld.lib")
 
@@ -299,7 +300,9 @@ namespace PI
 						std::vector<Vector2>*l_pPointsVector = e_pPuzzleImage->GetImageShapePointVector(i);
 						if (l_pPointsVector)
 						{
-							auto l_pTriangulatorBitmap = ImageWithTrianulator(l_pBitMap, l_pPointsVector);
+							std::vector<Vector2>l_TriangulatorVector = Triangulator(l_pPointsVector);
+							auto l_pTriangulatorBitmap = ImageWithTrianulator(l_pBitMap, &l_TriangulatorVector);
+
 							l_pTriangulatorBitmap->Save(DNCT::WcharToGcstring(l_pPuzzleData->strFileName) + ".png");
 							l_pBitMap = l_pTriangulatorBitmap;
 							m_ImageTale[gcnew String(DNCT::WcharToGcstring(l_pPuzzleData->strFileName))] = l_pBitMap;
@@ -646,9 +649,14 @@ namespace PI
 							auto l_pImageUnitTriangulator = m_pPuzzleImageUnitTriangulatorManager->GetObject(l_pUIImage);
 							if (l_pImageUnitTriangulator->isEdited())
 							{
-								auto l_pPoints = l_pImageUnitTriangulator->GetTriangulatorPointsVector();
+								auto l_pPoints = l_pImageUnitTriangulator->GetPointsVector();
 								if (l_pPoints->size())
+								{
 									l_XMLWriter.AddAttribute("TriangulatorPoints", ValueToString(*l_pPoints));
+									int l_iLOD = l_pImageUnitTriangulator->GetLOD();
+									if(l_iLOD > 1)
+										l_XMLWriter.AddAttribute("TriangulatorPointsLOD",l_iLOD);
+								}
 							}
 						}
 

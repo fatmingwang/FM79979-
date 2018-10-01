@@ -67,7 +67,7 @@ cPuzzleImageUnitTriangulator::cPuzzleImageUnitTriangulator(cUIImage*e_pTargetIma
 		for (int i = 0; i < 4; ++i)
 			//for(int i=0;i<5;++i)
 			m_PointVector.push_back(l_vPoints[i]);
-		GenerateTriangle();
+		this->SetLOD(1,true);
 	}
 }
 
@@ -200,7 +200,14 @@ void cPuzzleImageUnitTriangulator::Render()
 		return;
 	if (!m_pTargetImage)
 		return;
+
+	Vector4 l_vBorder(0,0, (float)m_pReferenceImage->GetWidth(), (float)m_pReferenceImage->GetHeight());
+	Vector4 l_vOffsetBorder((float)m_pReferenceImage->GetOffsetPos()->x, (float)m_pReferenceImage->GetOffsetPos()->y,
+		(float)m_pReferenceImage->GetRightDownStripOffPos().x,(float)m_pReferenceImage->GetRightDownStripOffPos().y);
+	Vector3 l_vPos = m_pTargetImage->GetPos();
+	m_pTargetImage->SetPos(Vector3::Zero);
 	this->m_pTargetImage->Render();
+	m_pTargetImage->SetPos(l_vPos);
 	if (m_TriangleVector.size() > 1)
 	{
 		int l_iCount = (int)m_TriangleVector.size()/3;
@@ -209,17 +216,24 @@ void cPuzzleImageUnitTriangulator::Render()
 			Vector4 l_vColor = Vector4::Zero;
 			l_vColor.a = 0.7f;
 			l_vColor.g = 1.f;
-			//if (i<10)
-			//	l_vColor.r += (i + 1);
-			//if (i<20)
-			//	l_vColor.g += (i + 1);
-			//if (i<30)
-			//	l_vColor.b += (i + 1);
 			std::vector<Vector2>l_vPos;
 			l_vPos.push_back(m_TriangleVector[i*3]);
 			l_vPos.push_back(m_TriangleVector[i * 3+1]);
 			l_vPos.push_back(m_TriangleVector[i * 3+2]);
 			l_vPos.push_back(m_TriangleVector[i * 3]);
+			//for (size_t j = 0; j < l_vPos.size(); j++)
+			//{
+			//	if (l_vOffsetBorder.x >= l_vPos[j].x ||
+			//		l_vOffsetBorder.y >= l_vPos[j].y ||
+			//		l_vOffsetBorder.z <= l_vPos[j].x ||
+			//		l_vOffsetBorder.w <= l_vPos[j].y)
+			//	{
+			//		l_vColor.r = 1.f;
+			//		l_vColor.g = 0.f;
+			//		break;
+			//	}
+			//}
+
 			GLRender::RenderLine(&l_vPos, l_vColor);
 		}
 	}
@@ -241,7 +255,13 @@ void cPuzzleImageUnitTriangulator::Render()
 		g_pDebugFont->SetLocalTransform(cMatrix44::ScaleMatrix(Vector3(1, 1, 1)));
 	}
 	RenderTriangleImage(Vector3((float)m_pTargetImage->GetWidth()+100, 0,0));
-	//GLRender::RenderRectangle(1000,1000,cMatrix44::Identity,Vector4::Red);
+	if (m_pReferenceImage)
+	{
+		Vector4 l_vColor = Vector4::One;
+		l_vColor.a = 0.3f;
+		GLRender::RenderRectangle((float)m_pReferenceImage->GetWidth(), (float)m_pReferenceImage->GetHeight(), cMatrix44::Identity, l_vColor);
+		GLRender::RenderRectangle(l_vOffsetBorder.Width(), l_vOffsetBorder.Height(), cMatrix44::TranslationMatrix(Vector3(l_vOffsetBorder.x, l_vOffsetBorder.y,0.f)), l_vColor);
+	}
 }
 
 
@@ -278,7 +298,8 @@ void	cPuzzleImageUnitTriangulator::RenderTriangleImage(Vector3 e_vPos)
 	{
 		m_pTargetImage->ApplyImage();
 		int l_iNumTriangles = (int)m_s2DVertex.vPosVector.size();
-		RenderTrianglesWithMatrix((float*)&m_s2DVertex.vPosVector[0], (float*)&m_s2DVertex.vUVVector[0], (float*)&m_s2DVertex.vColorVector[0], cMatrix44::TranslationMatrix(e_vPos), 3, l_iNumTriangles);
+		//if(l_iNumTriangles > 0)
+			RenderTrianglesWithMatrix((float*)&m_s2DVertex.vPosVector[0], (float*)&m_s2DVertex.vUVVector[0], (float*)&m_s2DVertex.vColorVector[0], cMatrix44::TranslationMatrix(e_vPos), 3, l_iNumTriangles);
 	}
 }
 
@@ -295,6 +316,11 @@ std::vector<Vector2>*	cPuzzleImageUnitTriangulator::GetPointsVector()
 }
 
 
+int		cPuzzleImageUnitTriangulator::GetLOD()
+{
+	return m_iLOD;
+}
+
 bool	cPuzzleImageUnitTriangulator::SetLOD(int e_iLODIndex, bool e_bForceUpdate)
 {
 	if (m_iLOD != e_iLODIndex || e_bForceUpdate)
@@ -304,7 +330,7 @@ bool	cPuzzleImageUnitTriangulator::SetLOD(int e_iLODIndex, bool e_bForceUpdate)
 		else
 			m_iLOD = e_iLODIndex;
 		m_LODPointVector = m_PointVector;
-		for(int i=0;i< m_iLOD;++i)
+		for(int i=1;i< m_iLOD;++i)
 			IncreaseLod(m_LODPointVector);
 		GenerateTriangle();
 		return true;
@@ -312,13 +338,13 @@ bool	cPuzzleImageUnitTriangulator::SetLOD(int e_iLODIndex, bool e_bForceUpdate)
 	return false;
 }
 
-TiXmlElement* cPuzzleImageUnitTriangulator::ToTiXmlElement()
-{
-	TiXmlElement*l_pTiXmlElement = new TiXmlElement(L"PIUnitTriangulator");
-	auto l_strPoints = ValueToStringW(m_PointVector);
-	l_pTiXmlElement->SetAttribute(L"Points", l_strPoints);
-	return nullptr;
-}
+//TiXmlElement* cPuzzleImageUnitTriangulator::ToTiXmlElement()
+//{
+//	TiXmlElement*l_pTiXmlElement = new TiXmlElement(L"PIUnitTriangulator");
+//	auto l_strPoints = ValueToStringW(m_PointVector);
+//	l_pTiXmlElement->SetAttribute(L"Points", l_strPoints);
+//	return nullptr;
+//}
 
 
 void cPuzzleImageUnitTriangulator::GenerateTriangle()
@@ -379,7 +405,7 @@ void cPuzzleImageUnitTriangulator::PointsToTriangulatorAddMouseDown(int e_iPosX,
 
 void cPuzzleImageUnitTriangulator::PointsToTriangulatorDeleteMouseDown(int e_iPosX, int e_iPosY, eMouseBehavior e_eMouseBehavior)
 {
-	MousePosAdjustToImageRectangle(e_iPosX, e_iPosY);
+	//MousePosAdjustToImageRectangle(e_iPosX, e_iPosY);
 	switch (e_eMouseBehavior)
 	{
 	case eMB_DOWN:
@@ -420,16 +446,16 @@ void cPuzzleImageUnitTriangulator::PointsToTriangulatorMoveMouseDown(int e_iPosX
 
 void	cPuzzleImageUnitTriangulator::MousePosAdjustToImageRectangle(int &e_iPosX, int &e_iPosY)
 {
-	if (m_pTargetImage)
+	if (m_pReferenceImage)
 	{
-		if (e_iPosX < 0)
-			e_iPosX = 0;
-		if (e_iPosX > m_pTargetImage->GetWidth())
-			e_iPosX = m_pTargetImage->GetWidth();
-		if (e_iPosY < 0)
-			e_iPosY = 0;
-		if (e_iPosY > m_pTargetImage->GetHeight())
-			e_iPosY = m_pTargetImage->GetHeight();
+		if (e_iPosX < m_pReferenceImage->GetOffsetPos()->x)
+			e_iPosX = m_pReferenceImage->GetOffsetPos()->x;
+		if (e_iPosX > m_pReferenceImage->GetRightDownStripOffPos().x)
+			e_iPosX = m_pReferenceImage->GetRightDownStripOffPos().x;
+		if (e_iPosY < m_pReferenceImage->GetOffsetPos()->y)
+			e_iPosY = m_pReferenceImage->GetOffsetPos()->y;
+		if (e_iPosY > m_pReferenceImage->GetRightDownStripOffPos().y)
+			e_iPosY = m_pReferenceImage->GetRightDownStripOffPos().y;
 	}
 }
 
@@ -448,8 +474,12 @@ void	cPuzzleImageUnitTriangulatorManager::AssignDataFromPuzzleImage(cPuzzleImage
 	{
 		cPuzzleImageUnitTriangulator*l_pPuzzleImageUnitTriangulator = GetObject(e_pUIImage);
 		std::vector<Vector2>*l_pPointsVector = e_pPI->GetImageShapePointVector(l_iIndex);
-		if(l_pPointsVector)
+		int	l_iLOD = e_pPI->GetImageShapePointLOD(l_iIndex);
+		if (l_pPointsVector)
+		{
+			l_pPuzzleImageUnitTriangulator->SetLOD(l_iLOD, false);
 			l_pPuzzleImageUnitTriangulator->SetPointsVector(l_pPointsVector);
+		}
 	}
 }
 
@@ -501,4 +531,22 @@ void	cPuzzleImageUnitTriangulatorManager::RenderPointsShapeLine()
 	{
 		this->GetObject(i)->RenderPointsShapeLine();
 	}
+}
+
+std::vector<Vector2>	Triangulator(std::vector<Vector2>*e_pData)
+{
+	std::vector<Vector2> l_TriangleVector;
+	Delaunay<float> triangulation;
+	const std::vector<Triangle<float> > l_Triangles = triangulation.triangulate((std::vector<DelaunayVector2<float> >*)e_pData);
+	size_t l_uiSize = l_Triangles.size();
+	for (size_t i = 0; i < l_uiSize; i++)
+	{
+		Vector2 l_v3Pos[3] = { *(Vector2*)(&l_Triangles[i].p1),
+								*(Vector2*)(&l_Triangles[i].p2),
+								*(Vector2*)(&l_Triangles[i].p3) };
+		l_TriangleVector.push_back(Vector2(l_v3Pos[0].x, l_v3Pos[0].y));
+		l_TriangleVector.push_back(Vector2(l_v3Pos[1].x, l_v3Pos[1].y));
+		l_TriangleVector.push_back(Vector2(l_v3Pos[2].x, l_v3Pos[2].y));
+	}
+	return l_TriangleVector;
 }
