@@ -475,6 +475,13 @@ namespace PI
 				return;
 			}
 		}
+		if (this->m_pPuzzleImageUnitTriangulatorManager)
+		{
+			if (m_pPuzzleImageUnitTriangulatorManager->IsObjectOverlap())
+			{
+				WARNING_MSG("object is overlap are you sure you want to save file!?");
+			}
+		}
 		 String^l_FileName = e_strFileName;
 		 if( e_bBinary )
 			 l_FileName += "b";

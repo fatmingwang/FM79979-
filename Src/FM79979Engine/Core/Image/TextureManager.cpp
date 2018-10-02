@@ -100,7 +100,7 @@ namespace FATMING_CORE
 #ifdef DEBUG
 		if (GetObjectIndexByName(e_pTexture->GetName()) != -1)
 		{
-			UT::ErrorMsgByFormat(L"PI same name as PIUnit while it's PI editor");
+			UT::ErrorMsgByFormat(L"%ls -PI same name as PIUnit while it's PI editor or something wrong?", e_pTexture->GetName());
 		}
 		std::wstring l_str = e_pTexture->GetName();
 		l_str += L" add into cTextureManager";

@@ -162,6 +162,7 @@ namespace FATMING_CORE
 
 		//btVector3 seperatingAxis(0.00000000f,0.059727669f,0.29259586f);
 		//convexConvex->setCachedSeperatingAxis(seperatingAxis);
+		assert(g_pInput&&"InitBT() not called!?");
 		g_pInput->m_transformA = *m_pmatTransform;
 		g_pInput->m_transformB = *e_pbtShapeCollision->GetTransform();
 

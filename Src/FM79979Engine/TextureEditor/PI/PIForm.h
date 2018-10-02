@@ -1730,11 +1730,13 @@ private: System::Windows::Forms::NumericUpDown^  AnimationTime_numericUpDown;
 						for (int i = 0; i < m_pImageomposerIRM->Count(); ++i)
 						{
 							cUIImage*l_p = dynamic_cast<cUIImage*>(m_pImageomposerIRM->GetObject(i));
-							Vector4	l_vColor(0, 0, 0, 1);
-							l_vColor.x = 1.f / ((i % 3) + 1);
-							l_vColor.y = 0.5f;
-							l_vColor.z = 1.f / ((l_iNum % (i + 1)) + 1);
-							l_vColor.w = 1;
+							//Vector4	l_vColor(0.5, 0.5, 0.5, 1.0);
+							Vector4	l_vColor(1.5, 1.5, 1.5, 1.0);
+							//Vector4	l_vColor(0, 0, 0, 1);
+							//l_vColor.x = 1.f / ((i % 3) + 1);
+							//l_vColor.y = 0.5f;
+							//l_vColor.z = 1.f / ((l_iNum % (i + 1)) + 1);
+							//l_vColor.w = 1;
 							Vector3	l_vPos = l_p->GetPos();
 							//+1 for offset start at 0,0
 							l_iRectWidth = l_p->GetRightDownStripOffPos().x - l_p->GetOffsetPos()->x + 1;
@@ -2140,8 +2142,11 @@ private: System::Windows::Forms::NumericUpDown^  AnimationTime_numericUpDown;
 						, l_MouseButton == System::Windows::Forms::MouseButtons::Right ? true : false, e->Delta, e->X, e->Y, Vector2((float)splitContainer2->Panel1->Size.Width, (float)splitContainer2->Panel1->Size.Height));
 					MouseCollideForPickUpObject(e, splitContainer2->Panel1);
 					ptCursor.x = e->X; ptCursor.y = e->Y;
-					HWND	l_Hwnd = WindowFromPoint(ptCursor);
-					//WCHAR*l_strName = WinGetTitle();
+					//HWND	l_Hwnd = WindowFromPoint(ptCursor);
+					if (this->m_pPuzzleImageUnitTriangulatorManager)
+					{
+						m_pPuzzleImageUnitTriangulatorManager->MouseMove(ptCursor.x, ptCursor.y);
+					}
 				}
 			 }
 	private: System::Void MyMouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e)

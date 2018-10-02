@@ -18,9 +18,11 @@ enum ePointsToTriangulatorType
 	ePTPT_DELETE,
 	ePTPT_MAX,
 };
+class cPuzzleImageUnitTriangulatorManager;
 //this should mix cCurve
 class cPuzzleImageUnitTriangulator:public NamedTypedObject
 {
+	friend class cPuzzleImageUnitTriangulatorManager;
 	bool	m_bEdited;
 	struct s2DVertex
 	{
@@ -37,6 +39,9 @@ class cPuzzleImageUnitTriangulator:public NamedTypedObject
 	std::vector<Vector2>		m_TriangleVector;
 	int							m_iLOD;
 	std::vector<Vector2>		m_RenderingTriangleVector;
+	cbtConvexHullShape*			m_pbtConvexHullShape;
+	bool						m_bCollided;
+	bool						IsCollided(cbtConvexHullShape*e_pbtConvexHullShape);
 	bool						GetImageBoard(Vector2*e_p4VectorPointer);
 	GET_SET_DEC(ePointsToTriangulatorType,m_ePointsToTriangulatorType,GetPointsToTriangulatorType,SetPointsToTriangulatorType);
 	GET_SET_DEC(cUIImage*,m_pTargetImage,GetTargetImage,SetTargetImage);
@@ -81,6 +86,8 @@ class cPuzzleImageUnitTriangulatorManager:public cNamedTypedObjectVector<cPuzzle
 {
 	using cNamedTypedObjectVector<cPuzzleImageUnitTriangulator>::GetObject;
 	using cNamedTypedObjectVector<cPuzzleImageUnitTriangulator>::RemoveObject;
+	c2DImageCollisionData	m_ForBTInit;
+	bool					m_bObjectOverlap;
 public:
 	cPuzzleImageUnitTriangulatorManager();
 	~cPuzzleImageUnitTriangulatorManager();
@@ -89,6 +96,8 @@ public:
 	cPuzzleImageUnitTriangulator*			GetObject(cUIImage*e_pUIImage);
 	void									RemoveObject(cUIImage*e_pUIImage);
 	void									RenderPointsShapeLine();
+	void									MouseMove(int e_iPosX, int e_iPosY);
+	bool									IsObjectOverlap() { return m_bObjectOverlap; }
 };
 
 std::vector<Vector2>	Triangulator(std::vector<Vector2>*e_pData);
